@@ -1,16 +1,22 @@
-const addResourcesToCache = async (resources) => {
-  const cache = await caches.open("v1")
-  await cache.addAll(resources)
-}
+const cached = []
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(addResourcesToCache(["./", "./sw.js"]))
-})
+setInterval(() => {
+  cached.shift()
+}, 1024 * 64)
 
 
-self.addEventListener("fetch", (event) => {
-  caches.open("v1").then(cache => {
-    cache.add(event.request)
-    event.respondWith(caches.match(event.request))
-  })
+addEventListener("fetch", async (event) => {
+  let method = "" + event.request.method
+  let url = "" + event.request.url
+  // console.log("Fetch detected:", method, url)
+  if (method.toLowerCase() != "get") return event.respondWith(fetch(event.request))
+
+  event.respondWith((async () => (await caches.match(event.request)) || (await fetch(event.request)))())
+
+  if (!cached.includes(url)) {
+    let cache = await caches.open("v1")
+    // console.log("Fetching", url, "...")
+    cache.add(url)
+    cached.push(url)
+  }
 })

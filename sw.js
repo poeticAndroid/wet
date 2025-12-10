@@ -16,13 +16,14 @@ addEventListener("install", (event) => {
     let cache = await caches.open("v1")
     let reqs = await cache.keys()
     for (let req of reqs) if (!cached.includes(req.url)) cached.push(req.url)
-  }, 1024 * 64)
+  }, 1024 * 8)
 })
 
 addEventListener("fetch", async (event) => {
   let method = "" + event.request.method
   let url = "" + event.request.url
   if (url.includes("?clear")) {
+    console.log("Cache is cleared! 💣")
     caches.delete("v1")
     cached = ["./", "./script.js", "./style.css"]
     cachePos = 0

@@ -1,12 +1,11 @@
 function init() {
-  try { navigator.serviceWorker.register("./sw.js") } catch (error) { console.error(error) }
+  console.log("Hello world..")
+  document.body.style.background = "#123"
 }
 
 
 
 
 
-
-
-
 init()
+navigator.serviceWorker.register("./sw.js", { scope: "./" })

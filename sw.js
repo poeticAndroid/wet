@@ -9,8 +9,8 @@ setInterval(async () => {
   cache.add(url)
 }, 1024)
 
-addEventListener("install", (event) => {
-  console.log("Installing service worker...")
+addEventListener("activate", (event) => {
+  console.log("Activating service worker...")
   setTimeout(async () => {
     console.log("Updating cache...")
     let cache = await caches.open("v1")

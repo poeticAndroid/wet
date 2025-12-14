@@ -16,11 +16,18 @@ export default class SyncedStorage {
   }
   base = location.toString()
   reconnectDelay = 1
+  candidateRooms = []
 
   constructor() {
     let a = document.createElement("a")
     a.href = "./"
     this.base = a.href
+
+    this.config = JSON.parse(this.getItem(this.base + "sync.json") || '{}')
+    this.config.account = this.config.account || newId()
+    this.config.password = this.config.password || newId()
+    this.setItem(this.base + "sync.json", JSON.stringify(this.config))
+
     this.connect()
   }
 
@@ -40,10 +47,12 @@ export default class SyncedStorage {
         delete _val.modified
         delete val.modified
 
-        if (JSON.stringify(val) != JSON.stringify(_val)) {
-          val.modified = Date.now()
-          this.send({ type: "obj", id: key.replace(this.base, ""), obj: val, to: "others" })
-        }
+        if (JSON.stringify(val) == JSON.stringify(_val)) return;
+        val.created = _val.created || Date.now()
+        val.modified = Date.now()
+        if (val.deleted) delete val.created
+        this.send({ type: "obj", id: key.replace(this.base, ""), obj: val, to: "others" })
+
         val = JSON.stringify(val)
       }
     } catch (error) { }
@@ -93,9 +102,12 @@ export default class SyncedStorage {
 
         case "topic":
           for (let roomId in msg.rooms) {
-            return this.send({ type: "room", id: roomId })
+            if (msg.rooms[roomId].name == this.config.account && !this.candidateRooms.includes(roomId)) this.candidateRooms.push(roomId)
           }
-          this.send({ type: "room", name: "party" })
+          if (!this.candidateRooms.includes("")) this.candidateRooms.push("")
+          if (this.candidateRooms[0]) this.send({ type: "room", id: this.candidateRooms[0], password: this.config.password })
+          else this.send({ type: "room", name: this.config.account, password: this.config.password })
+          this.candidateRooms.shift()
           break;
 
         case "room":
@@ -111,6 +123,10 @@ export default class SyncedStorage {
           switch (msg.cmd) {
             case "sync":
               this.sync()
+              break;
+
+            case "goto":
+              location.assign(msg.url)
               break;
 
             default:
@@ -144,7 +160,25 @@ export default class SyncedStorage {
         if (val?.modified) this.send({ type: "obj", id: key.replace(this.base, ""), obj: val, to: userId || "others" })
       } catch (error) { }
     }
-    if (userId && this.room?.host == this.user?.id) this.send({ type: "msg", cmd: "sync", to: userId })
+    if (this.invited) this.send({ type: "msg", cmd: "goto", url: "./" })
+    else if (userId && this.room?.host == this.user?.id) this.send({ type: "msg", cmd: "sync", to: userId })
+  }
+
+  generateInvite() {
+    this.config.account = newId()
+    this.config.password = newId()
+    this.invited = true
+    this.candidateRooms.unshift("")
+    if (this.ws?.readyState === WebSocket.OPEN) this.ws.close()
+    this.connect()
+    return `account=${this.config.account}&password=${this.config.password}`
+  }
+
+  uninvite() {
+    this.removeItem(base + "sync.json")
+    setTimeout(() => {
+      this.send({ type: "msg", cmd: "goto", url: "./" })
+    }, 1024)
   }
 
   send(msg) {
@@ -162,10 +196,19 @@ export default class SyncedStorage {
 
   async sendHashKey() {
     const encoder = new TextEncoder()
-    const data = encoder.encode(this.user.id + "@" + location.protocol + "//" + location.host + "/secret_key")
+    const data = encoder.encode(this.user.id + "@" + location.protocol + "//" + location.host + "/duYJOCPvJ2oIvlzX0TgxGGVLTsjM2oDQ")
     const hash = new Uint8Array(await window.crypto.subtle.digest("SHA-256", data))
     let hex = ""
     for (let byte of hash) hex += byte.toString(16).padStart(2, "0")
     this.send({ type: "topic", key: hex })
   }
+}
+
+
+function newId() {
+  let id = ""
+  while (id.length < 32) {
+    id += Math.random().toString(36).slice(2)
+  }
+  return id
 }

@@ -1,3 +1,15 @@
+wet-file,
+wet-folder {
+  display: block;
+  border: 1px dashed lightblue;
+  padding: 1em;
+}
+
+wet-folder {
+  border: 1px dashed yellow;
+}
+
+
 @media (prefers-color-scheme: dark) {
   html {
     background-color: #111;

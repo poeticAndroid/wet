@@ -23,6 +23,14 @@ export default class SyncedStorage {
     a.href = "./"
     this.base = a.href
 
+    this.client = JSON.parse(this.getItem(this.base + "client.json") || '{}')
+    if (this.client.modified) {
+      delete this.client.modified
+      this.client.name = newId()
+    }
+    this.client.name = this.client.name || newId()
+    this.client.timeOffset = this.client.timeOffset || 0
+
     this.config = JSON.parse(this.getItem(this.base + "sync.json") || '{}')
     this.config.account = this.config.account || newId()
     this.config.password = this.config.password || newId()
@@ -44,13 +52,14 @@ export default class SyncedStorage {
       _val = JSON.parse(_val)
       val = JSON.parse(val)
       if (typeof val == "object" && !(val instanceof Array)) {
+        let lastModified = _val.modified || 0
         delete _val.modified
         delete val.modified
 
-        if (JSON.stringify(val) == JSON.stringify(_val)) return;
-        val.created = _val.created || Date.now()
-        val.modified = Date.now()
+        val.created = _val.created || this.now()
         if (val.deleted) delete val.created
+        if (JSON.stringify(val) == JSON.stringify(_val)) return;
+        val.modified = Math.max(this.now(), lastModified + 1)
         this.send({ type: "obj", id: key.replace(this.base, ""), obj: val, to: "others" })
 
         val = JSON.stringify(val)
@@ -86,7 +95,7 @@ export default class SyncedStorage {
     this.room = null
 
     this.ws.addEventListener("open", (event) => {
-      this.send({ type: "user", name: "Wet user" })
+      this.send({ type: "user", name: this.client.name })
     })
 
     // Listen for messages
@@ -97,6 +106,7 @@ export default class SyncedStorage {
       switch (msg.type) {
         case "user":
           this.user = msg
+          this.send({ type: "ping", client_time: Date.now() })
           this.sendHashKey()
           break;
 
@@ -117,6 +127,11 @@ export default class SyncedStorage {
             }
           }
           this.room = msg
+          break;
+
+        case "ping":
+          this.client.timeOffset = msg.server_time - (msg.client_time + Date.now()) / 2
+          this.storage.setItem(this.base + "client.json", JSON.stringify(this.client))
           break;
 
         case "msg":
@@ -158,6 +173,15 @@ export default class SyncedStorage {
       try {
         let val = JSON.parse(this.storage.getItem(key))
         if (val?.modified) this.send({ type: "obj", id: key.replace(this.base, ""), obj: val, to: userId || "others" })
+        if (val?.deleted) {
+          if (val?.expired) {
+            if (val.expired < this.now()) this.storage.removeItem(key)
+          } else {
+            this.modified = (this.modified || 0) + 1
+            this.expired = this.now() + 1000 * 60 * 60 * 24 * 10 // in 10 days
+            this.storage.setItem(key, JSON.stringify(val))
+          }
+        }
       } catch (error) { }
     }
     if (this.invited) this.send({ type: "msg", cmd: "goto", url: "./" })
@@ -176,6 +200,7 @@ export default class SyncedStorage {
 
   uninvite() {
     this.removeItem(base + "sync.json")
+    this.removeItem(base + "client.json")
     setTimeout(() => {
       this.send({ type: "msg", cmd: "goto", url: "./" })
     }, 1024)
@@ -192,6 +217,10 @@ export default class SyncedStorage {
       }, this.reconnectDelay *= 2)
       this.reconnectDelay = -Math.abs(this.reconnectDelay)
     }
+  }
+
+  now() {
+    return Math.round(Date.now() + this.client.timeOffset)
   }
 
   async sendHashKey() {

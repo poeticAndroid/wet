@@ -4,7 +4,10 @@ export default class File extends HTMLElement {
     urlfs.removeListenerFromPath(this.src, this.update)
     this._src.href = val
     if (this.getAttribute("src") != this.src) this.setAttribute("src", this.src)
-    if (this.parentElement) urlfs.addListenerToPath(this.src, this.update)
+    if (this.isConnected) {
+      urlfs.addListenerToPath(this.src, this.update)
+      setTimeout(() => { this.update() })
+    }
   }
   get src() {
     return this._src.href
@@ -19,7 +22,7 @@ export default class File extends HTMLElement {
   connectedCallback() {
     if (this.src) {
       urlfs.addListenerToPath(this.src, this.update)
-      setTimeout(() => { this.update(this.src, urlfs.readText(this.src)) })
+      setTimeout(() => { this.update() })
     }
   }
 
@@ -37,8 +40,12 @@ export default class File extends HTMLElement {
     this[name.replaceAll("-", "_")] = newValue
   }
 
-  update(file, content) {
+  update(file = this.src, content = urlfs.readText(file)) {
+    try {
+      content = JSON.stringify(JSON.parse(content), null, 2)
+    } catch (error) { }
     this.textContent = content
   }
 }
-window.customElements.define('wet-file', File)
+
+customElements.define('wet-file', File)

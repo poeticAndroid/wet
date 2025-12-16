@@ -1,12 +1,14 @@
 wet-file,
 wet-folder {
   display: block;
-  border: 1px dashed lightblue;
-  padding: 1em;
+  border: 1px dashed yellow;
+  margin: .5em;
 }
 
-wet-folder {
-  border: 1px dashed yellow;
+wet-file {
+  border: 1px dashed lightblue;
+  font-family: monospace;
+  white-space: pre-wrap;
 }
 
 

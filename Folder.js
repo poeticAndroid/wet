@@ -28,4 +28,5 @@ export default class Folder extends File {
     }
   }
 }
-window.customElements.define('wet-folder', Folder)
+
+customElements.define('wet-folder', Folder)

@@ -4,6 +4,7 @@ export default class File extends HTMLElement {
     urlfs.removeListenerFromPath(this.src, this.update)
     this._src.href = val
     if (this.getAttribute("src") != this.src) this.setAttribute("src", this.src)
+    this.id = this.tagName.toLowerCase() + "_" + (this.src + "?").replaceAll("/?", "").replaceAll("?", "").split("/").pop().split(".").shift().replaceAll(":", "_").replaceAll("-", "_")
     if (this.isConnected) {
       urlfs.addListenerToPath(this.src, this.update)
       setTimeout(() => { this.update() })

@@ -4,9 +4,14 @@ import File from "./File.js"
 import Folder from "./Folder.js"
 
 function init() {
-  console.log("Hello world..")
-  document.body.style.background = "#123"
   urlfs.storage = new SyncedStorage()
+  console.log("Hello world..")
+  setTimeout(() => {
+    if (urlfs.readJson("sync.json").created < 1766198645095) {
+      urlfs.rm("./")
+      location.reload(true)
+    }
+  }, 1024 * 64)
 }
 
 

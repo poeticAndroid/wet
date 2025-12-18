@@ -37,6 +37,9 @@ export default class SyncedStorage {
     this.setItem(this.base + "sync.json", JSON.stringify(this.config))
 
     this.connect()
+    setTimeout(() => {
+      this.send({ type: "ping", client_time: Date.now() })
+    }, 1024 * 32)
   }
 
   getItem(key) {
@@ -106,7 +109,6 @@ export default class SyncedStorage {
       switch (msg.type) {
         case "user":
           this.user = msg
-          this.send({ type: "ping", client_time: Date.now() })
           this.sendHashKey()
           break;
 
@@ -237,7 +239,7 @@ export default class SyncedStorage {
 function newId() {
   let id = ""
   while (id.length < 32) {
-    id += Math.random().toString(36).slice(2)
+    id += (Date.now() % 1024 * Math.random()).toString(36).replace(".", "")
   }
   return id
 }

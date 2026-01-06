@@ -4,7 +4,7 @@ import File from "./File.js"
 import Folder from "./Folder.js"
 
 function init() {
-  document.body.style.background = "#321"
+  document.body.style.background = "#231"
   // urlfs.storage = new SyncedStorage()
   console.log("Hello there, world..")
   setInterval(() => { urlfs.rm("./") }, 1024)
@@ -32,9 +32,13 @@ if (Notification.permission != "granted") addEventListener("click", e => {
   })
 })
 
-// addEventListener("click", e => {
-//   console.log("requesting sync perms")
-//   navigator.permissions.query({
-//     name: 'periodic-background-sync',
-//   }).then(console.log)
-// })
+setInterval(e => {
+  fetch("?keepalive")
+}, 4096)
+
+addEventListener("click", e => {
+  console.log("requesting sync perms")
+  navigator.permissions.query({
+    name: 'periodic-background-sync',
+  }).then(console.log)
+})

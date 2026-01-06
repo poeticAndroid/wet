@@ -8,6 +8,14 @@ addEventListener("activate", e => {
   e.waitUntil(clients.claim())
 })
 
+let keepaliveTO
+function keepalive() {
+  clearTimeout(keepaliveTO)
+  keepaliveTO = setTimeout(e => {
+    new Notification("Feed me!")
+  }, 1000 * 25)
+}
+
 // setTimeout(e => {
 //   try {
 //     console.log("registering timer from sw")
@@ -24,7 +32,7 @@ function tick() {
   // clients.claim()
   let now = new Date()
   if (lastMinute != now.getMinutes()) {
-    registration.showNotification(`🚂 The time is now ${now.toLocaleTimeString()}! (${lastMinute})`)
+    registration.showNotification(`The time is now ${now.toLocaleTimeString()}! (${lastMinute})`)
     lastMinute = now.getMinutes()
   }
 }
@@ -46,13 +54,14 @@ setTimeout(async () => {
       cache.delete(req)
     }
   }
-  tick()
+  keepalive()
 }, 1024 * 16)
 
 addEventListener("fetch", async e => {
   let method = "" + e.request.method
   let url = "" + e.request.url
   if (method.toLowerCase() != "get") return e.respondWith(fetch(e.request))
+  if (url.includes("?keepalive")) return keepalive()
   if (url.includes("?clear")) {
     console.log("Cache is cleared! 💣")
     caches.delete(location.pathname)

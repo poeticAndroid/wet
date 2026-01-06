@@ -24,7 +24,7 @@ function tick() {
   // clients.claim()
   let now = new Date()
   if (lastMinute != now.getMinutes()) {
-    registration.showNotification(`🕛 The time is now ${now.toLocaleTimeString()}! (${lastMinute})`)
+    registration.showNotification(`⏱️ The time is now ${now.toLocaleTimeString()}! (${lastMinute})`)
     lastMinute = now.getMinutes()
   }
   scheduler.postTask(tick, { delay: 1000 - now.getMilliseconds() })

@@ -1,4 +1,5 @@
-console.log("Starting service worker", location.pathname)
+console.log("Starting service worker", location.pathname, registration)
+registration.showNotification("Hello from service worker!")
 
 setTimeout(async () => {
   let old = new Date(Date.now() - 1000 * 60 * 60 * 24 * 10) // 10 days ago

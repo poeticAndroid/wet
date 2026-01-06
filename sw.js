@@ -1,6 +1,6 @@
 console.log("Starting service worker", location.pathname, registration)
-addEventListener("install", e => { e.waitUntil(true) })
-addEventListener("activate", e => { e.waitUntil(true) })
+addEventListener("install", e => { e.waitUntil(new Promise(resolve => setTimeout(resolve, 1024))) })
+addEventListener("activate", e => { e.waitUntil(new Promise(resolve => setTimeout(resolve, 1024))) })
 
 setTimeout(e => {
   try {
@@ -37,19 +37,19 @@ setTimeout(async () => {
   }
 }, 1024 * 64)
 
-addEventListener("fetch", async (event) => {
-  let method = "" + event.request.method
-  let url = "" + event.request.url
-  if (method.toLowerCase() != "get") return event.respondWith(fetch(event.request))
+addEventListener("fetch", async e => {
+  let method = "" + e.request.method
+  let url = "" + e.request.url
+  if (method.toLowerCase() != "get") return e.respondWith(fetch(e.request))
   if (url.includes("?clear")) {
     console.log("Cache is cleared! 💣")
     caches.delete(location.pathname)
-    return event.respondWith(fetch(event.request))
+    return e.respondWith(fetch(e.request))
   }
   url = url.split("?")[0]
   url = url.split("#")[0]
   // console.log("Fetch detected:", method, url)
-  event.respondWith(cacheFirst(url))
+  e.respondWith(cacheFirst(url))
 })
 
 async function cacheFirst(url) {

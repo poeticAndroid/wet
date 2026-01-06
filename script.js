@@ -19,7 +19,7 @@ navigator.serviceWorker.register("./sw.js", { scope: "./" }).then(registration =
   setTimeout(e => {
     try {
       console.log("registering timer from script")
-      registration.periodicSync.register("timer", { minInterval: 1000 * 60, })
+      registration.periodicSync.register("timer", { minInterval: 1000 * 60 })
     } catch {
       console.error("Periodic Sync could not be registered!")
     }
@@ -30,4 +30,11 @@ if (Notification.permission != "granted") addEventListener("click", e => {
     console.log("permission", result)
     new Notification(`Notifications ${result}!`)
   })
+})
+
+addEventListener("click", e => {
+  console.log("requesting sync perms")
+  navigator.permissions.query({
+    name: 'periodic-background-sync',
+  }).then(console.log)
 })

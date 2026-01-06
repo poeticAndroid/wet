@@ -1,5 +1,15 @@
 console.log("Starting service worker", location.pathname, registration)
-registration.showNotification("Hello from service worker!")
+
+let lastHour = -1
+
+setInterval(e => {
+  let now = new Date()
+  if (lastHour != now.getHours()) {
+    registration.showNotification(`The time is now ${now.toLocaleTimeString}!`)
+    lastHour = now.getHours()
+  }
+}, 1024)
+
 
 setTimeout(async () => {
   let old = new Date(Date.now() - 1000 * 60 * 60 * 24 * 10) // 10 days ago

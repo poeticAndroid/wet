@@ -2,13 +2,16 @@ console.log("Starting service worker", location.pathname, registration)
 addEventListener("install", e => { e.waitUntil(true) })
 addEventListener("activate", e => { e.waitUntil(true) })
 
-try {
-  registration.periodicSync.register("timer", {
-    minInterval: 1000 * 60,
-  })
-} catch {
-  console.error("Periodic Sync could not be registered!")
-}
+setTimeout(e => {
+  try {
+    console.log("registering timer from sw")
+    registration.periodicSync.register("timer", {
+      minInterval: 1000 * 60,
+    })
+  } catch {
+    console.error("Periodic Sync could not be registered!")
+  }
+}, 4096)
 
 let lastMinute = -1
 addEventListener("periodicsync", e => {

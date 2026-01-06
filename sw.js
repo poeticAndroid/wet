@@ -20,14 +20,15 @@ addEventListener("activate", e => {
 // }, 4096)
 
 let lastMinute = -1
-setInterval(e => {
-  clients.claim()
+function tick() {
+  // clients.claim()
   let now = new Date()
   if (lastMinute != now.getMinutes()) {
     registration.showNotification(`🕛 The time is now ${now.toLocaleTimeString()}! (${lastMinute})`)
     lastMinute = now.getMinutes()
   }
-}, 1024)
+  scheduler.postTask(tick, { delay: 1000 - now.getMilliseconds() })
+}
 
 
 
@@ -43,6 +44,7 @@ setTimeout(async () => {
       cache.delete(req)
     }
   }
+  tick()
 }, 1024 * 16)
 
 addEventListener("fetch", async e => {

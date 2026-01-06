@@ -27,7 +27,7 @@ function tick() {
     registration.showNotification(`⏱️ The time is now ${now.toLocaleTimeString()}! (${lastMinute})`)
     lastMinute = now.getMinutes()
   }
-  scheduler.postTask(tick, { delay: 1000 - now.getMilliseconds() })
+  scheduler.postTask(tick, { delay: 1000 * 60 })
 }
 
 

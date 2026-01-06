@@ -13,7 +13,7 @@ function keepalive() {
   clearTimeout(keepaliveTO)
   keepaliveTO = setTimeout(e => {
     new Notification("Feed me!")
-  }, 1000 * 25)
+  }, 2048)
 }
 
 // setTimeout(e => {
@@ -32,7 +32,7 @@ function tick() {
   // clients.claim()
   let now = new Date()
   if (lastMinute != now.getMinutes()) {
-    registration.showNotification(`The time is now ${now.toLocaleTimeString()}! (${lastMinute})`)
+    registration.showNotification(`🦄 The time is now ${now.toLocaleTimeString()}! (${lastMinute})`)
     lastMinute = now.getMinutes()
   }
 }

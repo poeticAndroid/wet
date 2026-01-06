@@ -1,26 +1,34 @@
 console.log("Starting service worker", location.pathname, registration)
-addEventListener("install", e => { e.waitUntil(new Promise(resolve => setTimeout(resolve, 1024))) })
-addEventListener("activate", e => { e.waitUntil(new Promise(resolve => setTimeout(resolve, 1024))) })
+addEventListener("install", e => {
+  console.log("Installing service worker...")
+  e.waitUntil(new Promise(resolve => setTimeout(resolve, 1024)))
+})
+addEventListener("activate", e => {
+  console.log("Activating service worker...")
+  e.waitUntil(clients.claim())
+})
 
-setTimeout(e => {
-  try {
-    console.log("registering timer from sw")
-    registration.periodicSync.register("timer", {
-      minInterval: 1000 * 60,
-    })
-  } catch {
-    console.error("Periodic Sync could not be registered!")
-  }
-}, 4096)
+// setTimeout(e => {
+//   try {
+//     console.log("registering timer from sw")
+//     registration.periodicSync.register("timer", {
+//       minInterval: 1000 * 60,
+//     })
+//   } catch {
+//     console.error("Periodic Sync could not be registered!")
+//   }
+// }, 4096)
 
 let lastMinute = -1
-addEventListener("periodicsync", e => {
+setInterval(e => {
+  clients.claim()
   let now = new Date()
-  // if (lastMinute != now.getMinutes()) {
-  registration.showNotification(`⌛ The time is now ${now.toLocaleTimeString()}! (${lastMinute})`)
-  lastMinute = now.getMinutes()
-  // }
-})
+  if (lastMinute != now.getMinutes()) {
+    registration.showNotification(`🕛 The time is now ${now.toLocaleTimeString()}! (${lastMinute})`)
+    lastMinute = now.getMinutes()
+  }
+}, 1024)
+
 
 
 setTimeout(async () => {
@@ -35,7 +43,7 @@ setTimeout(async () => {
       cache.delete(req)
     }
   }
-}, 1024 * 64)
+}, 1024 * 16)
 
 addEventListener("fetch", async e => {
   let method = "" + e.request.method

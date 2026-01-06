@@ -15,9 +15,9 @@ function init() {
 
 init()
 navigator.serviceWorker.register("./sw.js", { scope: "./" })
-addEventListener("click", e => {
+if (Notification.permission != "granted") addEventListener("click", e => {
   Notification.requestPermission().then(result => {
     console.log("permission", result)
-    new Notification("Notifications enabled!")
+    new Notification(`Notifications ${result}!`)
   })
 })

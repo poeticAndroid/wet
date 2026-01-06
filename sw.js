@@ -1,12 +1,12 @@
 console.log("Starting service worker", location.pathname, registration)
 
-let lastHour = -1
+let lastMinute = -1
 
 setInterval(e => {
   let now = new Date()
-  if (lastHour != now.getHours()) {
+  if (lastMinute != now.getMinutes()) {
+    lastMinute = now.getMinutes()
     registration.showNotification(`The time is now ${now.toLocaleTimeString()}!`)
-    lastHour = now.getHours()
   }
 }, 1024)
 

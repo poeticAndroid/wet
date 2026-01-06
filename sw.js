@@ -5,8 +5,8 @@ let lastMinute = -1
 setInterval(e => {
   let now = new Date()
   if (lastMinute != now.getMinutes()) {
+    registration.showNotification(`⌚ The time is now ${now.toLocaleTimeString()}! (${lastMinute})`)
     lastMinute = now.getMinutes()
-    registration.showNotification(`⌚ The time is now ${now.toLocaleTimeString()}!`)
   }
 }, 1024)
 

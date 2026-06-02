@@ -12,7 +12,12 @@ let keepaliveTO
 function keepalive() {
   clearTimeout(keepaliveTO)
   keepaliveTO = setTimeout(e => {
-    registration.showNotification(`${location.toString().replace("sw.js", "")} needs to be open in order to work!`)
+    registration.showNotification(`${location.toString().replace("sw.js", "")} needs to be open in order to work!`, {
+      navigate: location.toString().replace("sw.js", ""),
+      requireInteraction: true,
+      silent: false,
+      vibrate: true,
+    })
   }, 2048)
 }
 

@@ -12,7 +12,7 @@ let keepaliveTO
 function keepalive() {
   clearTimeout(keepaliveTO)
   keepaliveTO = setTimeout(e => {
-    new Notification("Feed me!")
+    registration.showNotification(`${location.toString().replace("sw.js", "")} needs to be open to work!`)
   }, 2048)
 }
 

@@ -12,35 +12,9 @@ let keepaliveTO
 function keepalive() {
   clearTimeout(keepaliveTO)
   keepaliveTO = setTimeout(e => {
-    registration.showNotification(`${location.toString().replace("sw.js", "")} needs to be open to work!`)
+    registration.showNotification(`${location.toString().replace("sw.js", "")} needs to be open in order to work!`)
   }, 2048)
 }
-
-// setTimeout(e => {
-//   try {
-//     console.log("registering timer from sw")
-//     registration.periodicSync.register("timer", {
-//       minInterval: 1000 * 60,
-//     })
-//   } catch {
-//     console.error("Periodic Sync could not be registered!")
-//   }
-// }, 4096)
-
-let lastMinute = -1
-function tick() {
-  // clients.claim()
-  let now = new Date()
-  if (lastMinute != now.getMinutes()) {
-    registration.showNotification(`🦄 The time is now ${now.toLocaleTimeString()}! (${lastMinute})`)
-    lastMinute = now.getMinutes()
-  }
-}
-
-for (let i = 1; i < 100; i++) {
-  scheduler.postTask(tick, { delay: 10000 * i })
-}
-
 
 setTimeout(async () => {
   let old = new Date(Date.now() - 1000 * 60 * 60 * 24 * 10) // 10 days ago
@@ -54,7 +28,6 @@ setTimeout(async () => {
       cache.delete(req)
     }
   }
-  keepalive()
 }, 1024 * 16)
 
 addEventListener("fetch", async e => {
